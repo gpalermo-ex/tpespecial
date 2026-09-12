@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:18
+    container_name: postgres-container
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=base_catalogo
+    ports:
+      - "5432:5432"

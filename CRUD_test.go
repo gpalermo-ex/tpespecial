@@ -67,7 +67,7 @@ func TestCrud(t *testing.T){
 			IDUsuario: 2,
 			Titulo: "Detour",
 			Artista: "Kim Petras",
-			Descripcion: "jnaksjaskjdn",
+			Descripcion: "Álbum de música pop",
 			Genero: "Pop",
 			DuracionS: 360,
 			Ranking: 4,
@@ -77,12 +77,32 @@ func TestCrud(t *testing.T){
 		}
 		t.Logf("Álbum actualizado correctamente.")
 		
+		
 		updatedAlbum, err := queries.GetAlbum(ctx, createdID)
 		if err != nil {
 			t.Fatalf("Error al obtener álbum actualizado: %v", err)
 		}
 		t.Logf("Álbum actualizado: %+v\n", updatedAlbum)
 	})
+		
+	t.Run("UpdateAlbum", func(t *testing.T){
+			err = queries.UpdateAlbum(ctx, sqlc.UpdateAlbumParams{
+			IDAlbum: createdID,
+			IDUsuario: 2,
+			Titulo: "Detour Deluxe",
+			Artista: "Kim Petras 2.0",
+			Descripcion: "Álbum de música pop 2.0",
+			Genero: "Pop-Rock",
+			DuracionS: 360,
+			Ranking: 0,
+		})
+		if err != nil {
+			t.Logf("Error al actualizar álbum con ranking nulo: %v", err)
+		} else {
+			t.Fatalf("Álbum con ranking nulo actualizado correctamente")
+		}
+	})
+
 
 	t.Run("DeleteAlbum", func(t *testing.T){
 		err = queries.DeleteAlbum(ctx, createdID)
