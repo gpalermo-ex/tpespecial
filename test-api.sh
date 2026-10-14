@@ -1,5 +1,11 @@
 #!/bin/bash
 
+
+# ========================================================= PREGUNTAR ESTO =========================================================
+# README.md que ponemos?
+# Mucho más detallado, como una documentación de todo el proyecto y también como correr los tests
+# De última para más orden se puede hacer otro archivo para la documentación e indicarlo en el readme junto a las instrucciones de ejecución
+
 # Detener el script inmediatamente si algún comando falla
 set -e
 
@@ -9,6 +15,7 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 # ========================================================= PREGUNTAR ESTO =========================================================
 # Tengo que agregar esto porque sino me dice que el comando sqlc no lo reconoce, está bien? Lo raro es que en el anterior script no
 # lo pusimos y el profe no dijo nada, pero creo que queda mejor así.
+# Si, está mejor así, go instala en un directorio suyo, así le indicamos a bash el path de sqlc
 export PATH=$PATH:$(go env GOPATH)/bin
 
 echo -e "- Ejecutando sqlc...\n"
@@ -18,7 +25,8 @@ echo -e "- Borrando contenedores y volúmenes viejos...\n"
 docker compose down -v
 
 echo -e "- Levantando contenedor de postgres...\n"
-docker compose up -d
+# INVESTIGAR DOCKER COMPOSE WAIT
+docker compose up -d --wait
 
 echo -e "- Comprobando que la base de datos esté lista..."
 until docker exec postgres-container pg_isready -U admin > /dev/null 2>&1; do
@@ -29,6 +37,7 @@ echo -e "- Base de datos corriendo\n"
 echo -e "- Creando la tabla albums dentro de la base de datos...\n"
 # ========================================================= PREGUNTAR ESTO =========================================================
 # Está bien agregar la tabla álbums así dentro de la base de datos?
+# No, hacerlo dentro del docker compose, hay un parámetro, algo de volume
 docker exec -i postgres-container psql -U admin -d base_catalogo < db/schema/schema.sql
 
 echo -e "- Levantando servidor WEB...\n"
@@ -56,6 +65,10 @@ trap cleanup EXIT
 # Esperamos unos segundos por las dudas si no llegó a prenderse el server WEB
 sleep 2
 
+
+# ========================================================= CORREGIR ESTO =========================================================
+# Se deben controlar los resultados de los comandos, se puede hacer comparando los json devueltos o usando hurl es más fácil
+# con varios tests y sus asserts
 echo -e "- PRUEBA DE API ENDPOINTS:\n"
 
 echo "- Probando POST /albums (crear álbum)..."
