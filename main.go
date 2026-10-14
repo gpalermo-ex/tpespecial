@@ -8,12 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	// Importamos el driver de PostgreSQL silenciosamente
 	_ "github.com/jackc/pgx/v5/stdlib"
-	
-	// Importamos el paquete de base de datos generado por sqlc en el TP anterior
-	// REEMPLAZÁ "tu_proyecto/db/sqlc" POR LA RUTA REAL A TU PAQUETE DB!
 	sqlc "tpespecial/servidor-musica/db/sqlc"
 )
 
@@ -22,7 +17,7 @@ var queries *sqlc.Queries
 
 func main() {
 	// 1. Establecemos la conexión con la base de datos PostgreSQL que corre en Docker
-	// Usamos los mismos datos que configuraste en tu docker-compose.yml
+	// Usamos los mismos datos configurados en tu docker-compose.yml
 	connStr := "host=localhost port=5432 user=admin password=123 dbname=base_catalogo"
 	
 	db, err := sql.Open("pgx", connStr)
@@ -44,9 +39,8 @@ func main() {
 	queries = sqlc.New(db)
 
 	// Configurar rutas
-	// (Acá irán las rutas que haremos en el Punto 2)
-	http.HandleFunc("/albums", albumsHandler) // Cambié /products a /albums para tu proyecto
-	http.HandleFunc("/albums/", albumHandler) // Cambié /products a /albums para tu proyecto
+	http.HandleFunc("/albums", albumsHandler)
+	http.HandleFunc("/albums/", albumHandler)
 	
 	// Iniciar servidor
 	log.Println("Server starting on :8080...")
