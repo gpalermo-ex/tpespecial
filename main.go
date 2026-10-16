@@ -12,34 +12,32 @@ import (
 	sqlc "tpespecial/servidor-musica/db/sqlc"
 )
 
-// Creamos una variable global para el "Queries" de sqlc, así lo pueden usar todos los handlers
 var queries *sqlc.Queries
 
 func main() {
-	// 1. Establecemos la conexión con la base de datos PostgreSQL que corre en Docker
-	// Usamos los mismos datos configurados en tu docker-compose.yml
+	// Datos configurados en docker-compose.yml
 	connStr := "host=localhost port=5432 user=admin password=123 dbname=base_catalogo"
 	
+	// Establecemos la conexión con la bd de PostgreSQL que corre en Docker
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal("Error al configurar la base de datos:", err)
 	}
 
-	// 2. Verificamos que la conexión realmente funcione haciendo un "Ping"
+	// Verificamos la conexión a la bd haciendo un ping
 	if err := db.Ping(); err != nil {
 		log.Fatal("No se pudo conectar a la base de datos. ¿Está prendido Docker?:", err)
 	}
-	fmt.Println("¡Conexión a la base de datos exitosa!")
+	fmt.Println("Conexión a la base de datos exitosa")
 
-	// Importante: Cerramos la conexión al final del programa para no dejar conexiones colgadas
+	// Esta sentencia es para que la conexión a la bd se cierre al finalizar el programa
 	defer db.Close()
 
-	// 3. Creamos la instancia del repositorio generado por sqlc
-	// Esto nos va a permitir usar las funciones CreateAlbum, GetAlbum, etc. en los handlers
+	// Instancia del repositorio generado por sqlc
 	queries = sqlc.New(db)
 
-	// Configurar rutas
-	http.HandleFunc("/albums", albumsHandler)
+	// Rutas para los handlers
+	http.HandleFunc("/albums", albumesHandler)
 	http.HandleFunc("/albums/", albumHandler)
 	
 	// Iniciar servidor
@@ -47,11 +45,13 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// Manejador para /albums
-func albumsHandler(w http.ResponseWriter, r *http.Request) {
+// Handler para /albums
+func albumesHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	// Si se accede con método GET, listamos todos los álbumes
 	case http.MethodGet:
-		getAlbums(w, r)
+		getAlbumes(w, r)
+	// Si se accede con método POST, creamos un álbum
 	case http.MethodPost:
 		createAlbum(w, r)
 	default:
@@ -60,8 +60,10 @@ func albumsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Handler para /albums/XX
 func albumHandler(w http.ResponseWriter, r *http.Request) {
-	// Extraer ID del path
+	// Extraer IDAlbum del path de la URL (solo para verificar que existe y es un número)
+	// Esta función divide la URL usando como separador el string "/" 
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) != 3 {
 		http.Error(w, "URL inválida", http.StatusBadRequest)
@@ -73,10 +75,13 @@ func albumHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch r.Method {
+	// Si se accede con método GET, listamos el álbum indicado
 	case http.MethodGet:
 		getAlbum(w, r)
+	// Si se accede con método PUT, se actualiza el álbum indicado
 	case http.MethodPut:
 		updateAlbum(w, r)
+	// Si se accede con método DELETE, se borra el álbum indicado
 	case http.MethodDelete:
 		deleteAlbum(w, r)
 	default:
@@ -84,8 +89,8 @@ func albumHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /albums - Listar todos los albums
-func getAlbums(w http.ResponseWriter, r *http.Request) {
+// GET /albums - Listar todos los álbumes
+func getAlbumes(w http.ResponseWriter, r *http.Request) {
 	albums, err := queries.ListAlbums(r.Context())
 	if err != nil {
 		log.Println("Error de la BD al obtener álbumes:", err)
@@ -97,19 +102,21 @@ func getAlbums(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(albums)
 }
 
-// POST /albums - Crear nuevo album
+// POST /albums - Crear nuevo álbum
 func createAlbum(w http.ResponseWriter, r *http.Request) {
 	var params sqlc.CreateAlbumParams
+	// Decodificamos el JSON en la variable params
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, "JSON inválido", http.StatusBadRequest)
 		return
 	}
-
+	// Mínimamente tiene que tener el título del álbum
 	if strings.TrimSpace(params.Titulo) == "" {
 		http.Error(w, "El título no puede estar vacío", http.StatusBadRequest)
 		return
 	}
 
+	// Llamamos a la query que crea el álbum con los parámetros ingresados
 	newAlbum, err := queries.CreateAlbum(r.Context(), params)
 	if err != nil {
 		log.Println("Error de la BD al crear álbum:", err)
@@ -118,7 +125,7 @@ func createAlbum(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated) // 201
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newAlbum)
 }
 
