@@ -15,7 +15,6 @@ echo -e "- Borrando contenedores y volúmenes viejos...\n"
 docker compose down -v
 
 echo -e "- Levantando contenedor de postgres...\n"
-# INVESTIGAR DOCKER COMPOSE WAIT
 docker compose up -d --wait
 
 echo -e "- Comprobando que la base de datos esté lista..."
