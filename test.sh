@@ -28,11 +28,6 @@ echo "¡Base de datos corriendo!"
 
 sleep 2
 
-echo "5. Creamos la tabla albums"
-docker exec -i postgres-container psql -U admin -d base_catalogo < db/schema/schema.sql
-
-
-
 echo "6. Ejecutando los tests"
 go test -v
 
