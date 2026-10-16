@@ -6,6 +6,8 @@ set -e
 echo "Instalando (si no está instalado) sqlc"
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
+export PATH=$PATH:$(go env GOPATH)/bin
+
 echo "1. Generando código de sqlc"
 sqlc generate
 
@@ -26,19 +28,14 @@ until docker exec $(docker compose ps -q db) pg_isready -U admin > /dev/null 2>&
 done
 echo "¡Base de datos corriendo!"
 
+sleep 2
+
 echo "5. Creamos la tabla albums"
 docker exec -i postgres-container psql -U admin -d base_catalogo < db/schema/schema.sql
 
-echo "6. Ejecutando los tests"
-# Le pasamos las variables de entorno a Go justo antes de correr el test.
-# ATENCIÓN: Como el test corre en tu Ubuntu y no adentro de Docker, 
-# nos conectamos usando "localhost", no el nombre del contenedor.
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_USER=admin
-export DB_PASSWORD=123
-export DB_NAME=base_catalogo
 
+
+echo "6. Ejecutando los tests"
 # Corre todos los tests de tu proyecto usando el paquete testing
 go test -v
 

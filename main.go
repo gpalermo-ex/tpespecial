@@ -91,6 +91,7 @@ func albumHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /albums - Listar todos los álbumes
 func getAlbumes(w http.ResponseWriter, r *http.Request) {
+	// Llamamos directamente a la query de sqlc que lista todos los álbumes
 	albums, err := queries.ListAlbums(r.Context())
 	if err != nil {
 		log.Println("Error de la BD al obtener álbumes:", err)
@@ -104,8 +105,9 @@ func getAlbumes(w http.ResponseWriter, r *http.Request) {
 
 // POST /albums - Crear nuevo álbum
 func createAlbum(w http.ResponseWriter, r *http.Request) {
+
+	// Decodificamos en una variable params el JSON ingresado 
 	var params sqlc.CreateAlbumParams
-	// Decodificamos el JSON en la variable params
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, "JSON inválido", http.StatusBadRequest)
 		return
@@ -131,13 +133,18 @@ func createAlbum(w http.ResponseWriter, r *http.Request) {
 
 // Listar UN álbum
 func getAlbum(w http.ResponseWriter, r *http.Request) {
+
+	// Del path en la URL, nos quedamos solo con el IDAlbum, y lo guardamos en la variable idStr
 	idStr := strings.TrimPrefix(r.URL.Path, "/albums/")
+
+	// Parseamos ese id a tipo entero, en base 10 y hasta 32 bits
 	id, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
+	// Llamamos a la query para obtener el álbum con ese id
 	album, err := queries.GetAlbum(r.Context(), int32(id))
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -154,26 +161,35 @@ func getAlbum(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateAlbum(w http.ResponseWriter, r *http.Request) {
+
+	// Del path en la URL, nos quedamos solo con el IDAlbum, y lo guardamos en la variable idStr
 	idStr := strings.TrimPrefix(r.URL.Path, "/albums/")
+
+	// Parseamos ese id a tipo entero, en base 10 y hasta 32 bits
 	id, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
+	// Decodificamos en una variable params el JSON ingresado 
 	var params sqlc.UpdateAlbumParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, "JSON inválido", http.StatusBadRequest)
 		return
 	}
 
+	// Mínimamente tiene que tener el título del álbum
 	if strings.TrimSpace(params.Titulo) == "" {
 		http.Error(w, "El título no puede estar vacío", http.StatusBadRequest)
 		return
 	}
 
+	// Guardamos el id ingresado en la URL para actualizar ese álbum, no se puede ingresar en el JSON.
+	// Por defecto ParseInt crea un int64, lo casteamos a int32 que es el tipo real de IDAlbum
 	params.IDAlbum = int32(id)
 
+	// Llamamos a la query que actualiza el álbum
 	err = queries.UpdateAlbum(r.Context(), params)
 	if err != nil {
 		log.Println("Error de la BD al actualizar el álbum:", err)
@@ -186,13 +202,18 @@ func updateAlbum(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteAlbum(w http.ResponseWriter, r *http.Request) {
+
+	// Del path en la URL, nos quedamos solo con el IDAlbum, y lo guardamos en la variable idStr
 	idStr := strings.TrimPrefix(r.URL.Path, "/albums/")
+
+	// Parseamos ese id a tipo entero, en base 10 y hasta 32 bits
 	id, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
+	// Llamamos a la query que borra el álbum dado su id
 	err = queries.DeleteAlbum(r.Context(), int32(id))
 	if err != nil {
 

@@ -1,24 +1,20 @@
 # Catálogo Musical API
 
-Este proyecto es una API REST desarrollada en Go para gestionar un catálogo de álbumes musicales. Permite listar, crear, consultar, actualizar y eliminar registros de álbumes almacenados en una base de datos PostgreSQL.
-
-La aplicación está pensada como un backend simple y educativo para practicar CRUD, conexión a base de datos, generación de queries con SQLC y creación de endpoints HTTP con Go.
+Este proyecto es una API REST desarrollada en Go para gestionar un catálogo de álbumes musicales y poder opinar rankearlos según tu gusto. Permite listar, crear, consultar, actualizar y eliminar registros de álbumes almacenados en una base de datos PostgreSQL.
 
 ## ¿Qué hace la aplicación?
 
 La API permite administrar información sobre álbumes, incluyendo:
 
-- identificador del álbum
-- identificador del usuario
-- título
-- artista
-- descripción
-- género
-- duración en segundos
-- ranking (valor entre 1 y 5)
-- fecha de creación
-
-Con esto, el sistema puede servir como base para un catálogo musical, una app de recomendaciones o un backend para una interfaz web.
+- Identificador del álbum
+- Identificador del usuario
+- Título
+- Artista
+- Descripción
+- Género
+- Duración en segundos
+- Ranking (valoración del usuario entre 1 y 5)
+- Fecha de en la que se subió la valoración.
 
 ## Tecnologías utilizadas
 
@@ -38,7 +34,7 @@ Con esto, el sistema puede servir como base para un catálogo musical, una app d
 - `static/index.html`: ejemplo de frontend estático para la vista del catálogo.
 - `docker-compose.yml`: configuración del contenedor de PostgreSQL.
 - `CRUD_test.go`: pruebas para validar el CRUD.
-- `test-api.sh` y `test.sh`: scripts útiles para pruebas y ejecución.
+- `test-api.sh` y `test.sh`: scripts útiles para ejecutar pruebas.
 
 ## Base de datos
 
@@ -134,11 +130,11 @@ Para ejecutarlos:
 
 ```bash
 # Para testear el CRUD_test.go
-chmod +x test.sh
+#chmod +x test.sh
 ./test.sh
 
 # Para testear API REST
-chmod +x test-api.sh
+#chmod +x test-api.sh
 ./test-api.sh
 ```
 
