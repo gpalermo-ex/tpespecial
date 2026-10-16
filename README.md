@@ -1,6 +1,6 @@
 # Catálogo Musical API
 
-Este proyecto es una API REST desarrollada en Go para gestionar un catálogo de álbumes musicales y poder opinar rankearlos según tu gusto. Permite listar, crear, consultar, actualizar y eliminar registros de álbumes almacenados en una base de datos PostgreSQL.
+Este proyecto es una API REST desarrollada en Go para gestionar un catálogo de álbumes musicales y poder rankearlos según tu gusto. Permite listar, crear, consultar, actualizar y eliminar registros de álbumes almacenados en una base de datos PostgreSQL.
 
 ## ¿Qué hace la aplicación?
 
