@@ -7,35 +7,50 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
-const createAlbum = `-- name: CreateAlbum :one
-INSERT INTO albums (id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking) 
-VALUES ($1, $2, $3, $4, $5, $6, $7) 
-RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at
+const createRegister = `-- name: CreateRegister :one
+INSERT INTO albums (id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at
 `
 
-type CreateAlbumParams struct {
-	IDUsuario   int32  `json:"id_usuario"`
+type CreateRegisterParams struct {
+	IDAlbum     int32  `json:"id_album"`
+	IDUsuario   string `json:"id_usuario"`
 	Titulo      string `json:"titulo"`
 	Artista     string `json:"artista"`
 	Descripcion string `json:"descripcion"`
 	Genero      string `json:"genero"`
-	DuracionS   int32  `json:"duracion_s"`
-	Ranking     int32  `json:"ranking"`
+	DuracionMin int32  `json:"duracion_min"`
+	Rating      int32  `json:"rating"`
 }
 
-func (q *Queries) CreateAlbum(ctx context.Context, arg CreateAlbumParams) (Album, error) {
-	row := q.db.QueryRowContext(ctx, createAlbum,
+type CreateRegisterRow struct {
+	IDAlbum     int32        `json:"id_album"`
+	IDUsuario   string       `json:"id_usuario"`
+	Titulo      string       `json:"titulo"`
+	Artista     string       `json:"artista"`
+	Descripcion string       `json:"descripcion"`
+	Genero      string       `json:"genero"`
+	DuracionMin int32        `json:"duracion_min"`
+	Rating      int32        `json:"rating"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+}
+
+func (q *Queries) CreateRegister(ctx context.Context, arg CreateRegisterParams) (CreateRegisterRow, error) {
+	row := q.db.QueryRowContext(ctx, createRegister,
+		arg.IDAlbum,
 		arg.IDUsuario,
 		arg.Titulo,
 		arg.Artista,
 		arg.Descripcion,
 		arg.Genero,
-		arg.DuracionS,
-		arg.Ranking,
+		arg.DuracionMin,
+		arg.Rating,
 	)
-	var i Album
+	var i CreateRegisterRow
 	err := row.Scan(
 		&i.IDAlbum,
 		&i.IDUsuario,
@@ -43,54 +58,55 @@ func (q *Queries) CreateAlbum(ctx context.Context, arg CreateAlbumParams) (Album
 		&i.Artista,
 		&i.Descripcion,
 		&i.Genero,
-		&i.DuracionS,
-		&i.Ranking,
+		&i.DuracionMin,
+		&i.Rating,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const deleteAlbum = `-- name: DeleteAlbum :exec
+const deleteRegister = `-- name: DeleteRegister :exec
 DELETE FROM albums 
-WHERE id_album = $1
+WHERE id_registro = $1
 `
 
-func (q *Queries) DeleteAlbum(ctx context.Context, idAlbum int32) error {
-	_, err := q.db.ExecContext(ctx, deleteAlbum, idAlbum)
+func (q *Queries) DeleteRegister(ctx context.Context, idRegistro int32) error {
+	_, err := q.db.ExecContext(ctx, deleteRegister, idRegistro)
 	return err
 }
 
-const getAlbum = `-- name: GetAlbum :one
-SELECT id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at 
+const getRegister = `-- name: GetRegister :one
+SELECT id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at 
 FROM albums 
-WHERE id_album = $1
+WHERE id_registro = $1
 `
 
-func (q *Queries) GetAlbum(ctx context.Context, idAlbum int32) (Album, error) {
-	row := q.db.QueryRowContext(ctx, getAlbum, idAlbum)
+func (q *Queries) GetRegister(ctx context.Context, idRegistro int32) (Album, error) {
+	row := q.db.QueryRowContext(ctx, getRegister, idRegistro)
 	var i Album
 	err := row.Scan(
+		&i.IDRegistro,
 		&i.IDAlbum,
 		&i.IDUsuario,
 		&i.Titulo,
 		&i.Artista,
 		&i.Descripcion,
 		&i.Genero,
-		&i.DuracionS,
-		&i.Ranking,
+		&i.DuracionMin,
+		&i.Rating,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const listAlbums = `-- name: ListAlbums :many
-SELECT id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at 
-FROM albums 
-ORDER BY id_album
+const listRegisters = `-- name: ListRegisters :many
+SELECT id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at 
+FROM albums
+ORDER BY id_registro
 `
 
-func (q *Queries) ListAlbums(ctx context.Context) ([]Album, error) {
-	rows, err := q.db.QueryContext(ctx, listAlbums)
+func (q *Queries) ListRegisters(ctx context.Context) ([]Album, error) {
+	rows, err := q.db.QueryContext(ctx, listRegisters)
 	if err != nil {
 		return nil, err
 	}
@@ -99,14 +115,15 @@ func (q *Queries) ListAlbums(ctx context.Context) ([]Album, error) {
 	for rows.Next() {
 		var i Album
 		if err := rows.Scan(
+			&i.IDRegistro,
 			&i.IDAlbum,
 			&i.IDUsuario,
 			&i.Titulo,
 			&i.Artista,
 			&i.Descripcion,
 			&i.Genero,
-			&i.DuracionS,
-			&i.Ranking,
+			&i.DuracionMin,
+			&i.Rating,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -122,33 +139,35 @@ func (q *Queries) ListAlbums(ctx context.Context) ([]Album, error) {
 	return items, nil
 }
 
-const updateAlbum = `-- name: UpdateAlbum :exec
-UPDATE albums 
-SET id_usuario = $2, titulo = $3, artista = $4, descripcion = $5, genero = $6, duracion_s = $7, ranking = $8
-WHERE id_album = $1
+const updateRegister = `-- name: UpdateRegister :exec
+UPDATE albums
+SET id_album = $2, id_usuario = $3, titulo = $4, artista = $5, descripcion = $6, genero = $7, duracion_min = $8, rating = $9
+WHERE id_registro = $1
 `
 
-type UpdateAlbumParams struct {
+type UpdateRegisterParams struct {
+	IDRegistro  int32  `json:"id_registro"`
 	IDAlbum     int32  `json:"id_album"`
-	IDUsuario   int32  `json:"id_usuario"`
+	IDUsuario   string `json:"id_usuario"`
 	Titulo      string `json:"titulo"`
 	Artista     string `json:"artista"`
 	Descripcion string `json:"descripcion"`
 	Genero      string `json:"genero"`
-	DuracionS   int32  `json:"duracion_s"`
-	Ranking     int32  `json:"ranking"`
+	DuracionMin int32  `json:"duracion_min"`
+	Rating      int32  `json:"rating"`
 }
 
-func (q *Queries) UpdateAlbum(ctx context.Context, arg UpdateAlbumParams) error {
-	_, err := q.db.ExecContext(ctx, updateAlbum,
+func (q *Queries) UpdateRegister(ctx context.Context, arg UpdateRegisterParams) error {
+	_, err := q.db.ExecContext(ctx, updateRegister,
+		arg.IDRegistro,
 		arg.IDAlbum,
 		arg.IDUsuario,
 		arg.Titulo,
 		arg.Artista,
 		arg.Descripcion,
 		arg.Genero,
-		arg.DuracionS,
-		arg.Ranking,
+		arg.DuracionMin,
+		arg.Rating,
 	)
 	return err
 }

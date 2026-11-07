@@ -1,23 +1,23 @@
--- name: CreateAlbum :one
-INSERT INTO albums (id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking) 
-VALUES ($1, $2, $3, $4, $5, $6, $7) 
-RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at;
+-- name: CreateRegister :one
+INSERT INTO albums (id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at;
 
--- name: GetAlbum :one
-SELECT id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at 
+-- name: GetRegister :one
+SELECT id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at 
 FROM albums 
-WHERE id_album = $1;
+WHERE id_registro = $1;
 
--- name: ListAlbums :many
-SELECT id_album, id_usuario, titulo, artista, descripcion, genero, duracion_s, ranking, created_at 
-FROM albums 
-ORDER BY id_album;
+-- name: ListRegisters :many
+SELECT id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at 
+FROM albums
+ORDER BY id_registro;
 
--- name: UpdateAlbum :exec
-UPDATE albums 
-SET id_usuario = $2, titulo = $3, artista = $4, descripcion = $5, genero = $6, duracion_s = $7, ranking = $8
-WHERE id_album = $1;
+-- name: UpdateRegister :exec
+UPDATE albums
+SET id_album = $2, id_usuario = $3, titulo = $4, artista = $5, descripcion = $6, genero = $7, duracion_min = $8, rating = $9
+WHERE id_registro = $1;
 
--- name: DeleteAlbum :exec
+-- name: DeleteRegister :exec
 DELETE FROM albums 
-WHERE id_album = $1;
+WHERE id_registro = $1;

@@ -1,0 +1,44 @@
+package views
+
+import (
+	"fmt"
+	"tpespecial/servidor-musica/db/sqlc"
+)
+
+templ RegisterList(albums []db.Album) {
+	<section>
+		<h2>Colección de Álbumes</h2>
+		if len(albums) == 0 {
+			<p>No hay álbumes en el catálogo.</p>
+		} else {
+			<table>
+				<thead>
+					<tr>
+						<th scope="col">Album</th>
+						<th scope="col">Usuario</th>
+						<th scope="col">Título</th>
+						<th scope="col">Artista</th>
+						<th scope="col">Género</th>
+						<th scope="col">Duración</th>
+						<th scope="col">Rating</th>
+						<th scope="col">Fecha creacion</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, album := range albums {
+						<tr>
+							<td>{ fmt.Sprint(album.IDAlbum) }</td>
+							<td>{ fmt.Sprint(album.IDUsuario) }</td>
+							<td><strong>{ album.Titulo }</strong></td>
+							<td>{ album.Artista }</td>
+							<td>{ album.Genero }</td>
+							<td>{ fmt.Sprint(album.DuracionMin) } min</td>
+							<td>{ fmt.Sprint(album.Rating) }/5</td>
+							<td>{ fmt.Sprint(album.CreatedAt) }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</section>
+}

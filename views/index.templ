@@ -1,0 +1,15 @@
+package views
+
+import (
+	"tpespecial/servidor-musica/db/sqlc"
+)
+
+templ ContenidoIndex(registros []db.Album){
+    @EntityForm()
+    @RegisterList(registros)
+}
+
+
+templ IndexPage(titulo string, registros []db.Album){
+    @Layout(titulo, ContenidoIndex(registros))
+}

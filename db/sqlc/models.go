@@ -9,13 +9,14 @@ import (
 )
 
 type Album struct {
+	IDRegistro  int32        `json:"id_registro"`
 	IDAlbum     int32        `json:"id_album"`
-	IDUsuario   int32        `json:"id_usuario"`
+	IDUsuario   string       `json:"id_usuario"`
 	Titulo      string       `json:"titulo"`
 	Artista     string       `json:"artista"`
 	Descripcion string       `json:"descripcion"`
 	Genero      string       `json:"genero"`
-	DuracionS   int32        `json:"duracion_s"`
-	Ranking     int32        `json:"ranking"`
+	DuracionMin int32        `json:"duracion_min"`
+	Rating      int32        `json:"rating"`
 	CreatedAt   sql.NullTime `json:"created_at"`
 }

@@ -1,18 +1,72 @@
 <!DOCTYPE html>
-<html>
-<head><title>Catálogo de música</title></head>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Álbumes Musicales</title>
+    <!-- Vinculación de la hoja de estilos externa -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Vinculación del script de JavaScript con atributo defer -->
+    <script src="app.js" defer></script>
+</head>
 <body>
-  <h1>Catálogo de tu música preferida</h1>
-  <p>
-  	En esta página vas a poder agregar y puntuar los albumes favoritos de tus artistas favoritos.
-  </p>
-  <h2>Información que vas a encontrar:</h2>
-  <ul>
-    <li><strong>Descripción del álbum</strong></li>
-    <li><strong>Fecha de lanzamiento</strong></li>
-	<li><strong>Cantidad de canciones</strong></li>
-	<li><strong>Duración total</strong></li>
-	<li><strong>Puntuación del álbum</strong></li> 
- </ul>
+
+    <header>
+        <h1>Catálogo de Álbumes</h1>
+    </header>
+
+    <main class="main-container">
+        <!-- Sección 1: Formulario para crear un nuevo álbum -->
+        <section class="form-section">
+            <h2>Agregar Nuevo Álbum</h2>
+            <form id="album-form">
+                <div class="form-group">
+                    <label for="id_usuario">ID Usuario:</label>
+                    <input type="number" id="id_usuario" required min="1" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="artista">Artista:</label>
+                    <input type="text" id="artista" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <input type="text" id="descripcion">
+                </div>
+
+                <div class="form-group">
+                    <label for="genero">Género:</label>
+                    <input type="text" id="genero">
+                </div>
+
+                <div class="form-group">
+                    <label for="duracion_s">Duración (segundos):</label>
+                    <input type="number" id="duracion_s" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="ranking">Ranking (1 al 5):</label>
+                    <input type="number" id="ranking" min="1" max="5" value="5">
+                </div>
+
+                <button type="submit" id="btn-submit">Guardar Álbum</button>
+            </form>
+        </section>
+
+        <!-- Sección 2: Contenedor dinámico donde se listarán los álbumes -->
+        <section class="list-section">
+            <h2>Colección de Álbumes</h2>
+            <div id="albums-container" class="albums-grid">
+                <!-- JavaScript renderizará aquí las tarjetas de cada álbum -->
+            </div>
+        </section>
+    </main>
+
 </body>
 </html>

@@ -26,96 +26,99 @@ func TestCrud(t *testing.T){
 	
 	var createdID int32
 
-	t.Run("CreateAlbum", func(t *testing.T){
-		createdAlbum, err := queries.CreateAlbum(ctx,
-			sqlc.CreateAlbumParams{
-				IDUsuario: 1,
+	t.Run("CreateRegister", func(t *testing.T){
+		createdRegister, err := queries.CreateRegister(ctx,
+			sqlc.CreateRegisterParams{
+				IDAlbum: 1,
+				IDUsuario: "vale_jaurena",
 				Titulo: "Ya es mañana",
 				Artista: "Morat",
 				Descripcion: "Habla de que hoy es mañana",
 				Genero: "Pop-rock",
-				DuracionS: 40000,
-				Ranking: 4,
+				DuracionMin: 40,
+				Rating: 4,
 			})
 		if err != nil {
-			t.Fatalf("Error al crear álbum: %v", err)
+			t.Fatalf("Error al crear registro: %v", err)
 		}
 
-		createdID = createdAlbum.IDAlbum
-		t.Logf("Álbum creado: %+v\n", createdAlbum)
+		createdID = createdRegister.IDRegistro
+		t.Logf("Registro creado: %+v\n", createdRegister)
 	})
 
-	t.Run("GetAlbum", func(t *testing.T){
-		album, err := queries.GetAlbum(ctx, createdID)
+	t.Run("GetRegister", func(t *testing.T){
+		registro, err := queries.GetRegister(ctx, createdID)
 		if err != nil {
-			t.Fatalf("Error al obtener álbum: %v", err)
+			t.Fatalf("Error al obtener registro: %v", err)
 		}
-		t.Logf("Álbum obtenido: %+v\n", album)
+		t.Logf("Registro obtenido: %+v\n", registro)
 	})
 
-	t.Run("ListAlbums", func(t *testing.T){
-		albums, err := queries.ListAlbums(ctx)
+	t.Run("ListRegisters", func(t *testing.T){
+		registros, err := queries.ListRegisters(ctx)
 		if err != nil {
-			t.Fatalf("Error al listar albumes: %v", err)
+			t.Fatalf("Error al listar registros: %v", err)
 		}
-		t.Logf("Todos los albumes: %+v\n", albums)
+		t.Logf("Todos los registros: %+v\n", registros)
 	})
 
-	t.Run("UpdateAlbum", func(t *testing.T){
-		err = queries.UpdateAlbum(ctx, sqlc.UpdateAlbumParams{
-			IDAlbum: createdID,
-			IDUsuario: 2,
+	t.Run("UpdateRegister", func(t *testing.T){
+		err = queries.UpdateRegister(ctx, sqlc.UpdateRegisterParams{
+			IDRegistro: createdID,
+			IDAlbum: 4,
+			IDUsuario: "gonza_pal",
 			Titulo: "Detour",
 			Artista: "Kim Petras",
 			Descripcion: "Álbum de música pop",
 			Genero: "Pop",
-			DuracionS: 360,
-			Ranking: 4,
+			DuracionMin: 36,
+			Rating: 4,
 		})
 		if err != nil {
-			t.Fatalf("Error al actualizar álbum: %v", err)
+			t.Fatalf("Error al actualizar registro: %v", err)
 		}
-		t.Logf("Álbum actualizado correctamente.")
+		t.Logf("Registro actualizado correctamente.")
 		
 		
-		updatedAlbum, err := queries.GetAlbum(ctx, createdID)
+		updatedRegister, err := queries.GetRegister(ctx, createdID)
 		if err != nil {
-			t.Fatalf("Error al obtener álbum actualizado: %v", err)
+			t.Fatalf("Error al obtener registro actualizado: %v", err)
 		}
-		t.Logf("Álbum actualizado: %+v\n", updatedAlbum)
+		t.Logf("Registro actualizado: %+v\n", updatedRegister)
 	})
 		
-	t.Run("UpdateAlbum", func(t *testing.T){
-			err = queries.UpdateAlbum(ctx, sqlc.UpdateAlbumParams{
-			IDAlbum: createdID,
-			IDUsuario: 2,
+	t.Run("UpdateRegister", func(t *testing.T){
+		err = queries.UpdateRegister(ctx, sqlc.UpdateRegisterParams{
+			IDRegister: createdID,
+			IDAlbum: 6,
+			IDUsuario: "gonza_pal",
 			Titulo: "Detour Deluxe",
 			Artista: "Kim Petras 2.0",
 			Descripcion: "Álbum de música pop 2.0",
 			Genero: "Pop-Rock",
-			DuracionS: 360,
-			Ranking: 0,
+			DuracionMin: 30,
+			Rating: 0,
 		})
 		if err != nil {
-			t.Logf("Error al actualizar álbum con ranking nulo: %v", err)
+			t.Logf("Error al actualizar registro con rating nulo: %v", err)
 		} else {
-			t.Fatalf("Álbum con ranking nulo actualizado correctamente")
+			t.Fatalf("Registro con rating nulo actualizado correctamente")
 		}
 	})
 
 
-	t.Run("DeleteAlbum", func(t *testing.T){
-		err = queries.DeleteAlbum(ctx, createdID)
+	t.Run("DeleteRegister", func(t *testing.T){
+		err = queries.DeleteRegister(ctx, createdID)
 		if err != nil {
-			t.Fatalf("Error al borrar álbum: %v", err)
+			t.Fatalf("Error al borrar registro: %v", err)
 		}
-		t.Logf("Álbum borrado correctamente.")
+		t.Logf("Registro borrado correctamente.")
 
-		_, err = queries.GetAlbum(ctx, createdID)
+		_, err = queries.GetRegister(ctx, createdID)
 		if err == sql.ErrNoRows {
-			t.Logf("Álbum borrado no encontrado.")
+			t.Logf("Registro borrado no encontrado.")
 		} else if err != nil {
-			t.Fatalf("Error al obtener álbum despues de borrarlo: %v", err)
+			t.Fatalf("Error al obtener registro despues de borrarlo: %v", err)
 		}
 	})
 }
