@@ -17,12 +17,6 @@ docker compose down -v
 echo -e "- Levantando contenedor de postgres...\n"
 docker compose up -d --wait
 
-echo -e "- Comprobando que la base de datos esté lista..."
-until docker exec postgres-container pg_isready -U admin > /dev/null 2>&1; do
-  sleep 1
-done
-echo -e "- Base de datos corriendo\n"
-
 echo -e "- Levantando servidor WEB...\n"
 # Compilamos la aplicación para despues poder obtener el PID y poder terminar la ejecución
 go build -o api_server .

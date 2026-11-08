@@ -64,10 +64,10 @@ Para detener el servidor, usá `Ctrl+C`. Para detener y eliminar también los co
 | `make run` | Limpia los volúmenes, inicia PostgreSQL, genera SQLC y Templ, y ejecuta la aplicación. |
 | `make up` | Limpia los volúmenes e inicia PostgreSQL en segundo plano. |
 | `make generate` | Regenera el código de SQLC y las vistas Templ. |
-| `make test` | Ejecuta el script de pruebas ubicado en `tests/test.sh`. |
+| `make test` | Prepara la base de datos, genera SQLC y Templ, ejecuta `go test -v ./tests/...` y limpia los contenedores y volúmenes al terminar. |
 | `make clean` | Detiene los contenedores y elimina los volúmenes de Docker Compose. |
 
-`make up` también depende de `make clean`, por lo tanto recrea la base de datos y elimina sus datos anteriores. El comando `make test` prepara y limpia la base de datos según los pasos del script.
+`make up` también depende de `make clean`, por lo tanto recrea la base de datos y elimina sus datos anteriores. `make test` realiza esa preparación antes de ejecutar las pruebas y garantiza la limpieza al finalizar, incluso si las pruebas fallan.
 
 
 

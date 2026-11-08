@@ -17,9 +17,9 @@ run: up generate
 	@echo "> Ejecutando main.go..."
 	@go run main.go
 
-test: 
+test: up generate
 	@echo "> Ejecutando tests..."
-	@./tests/test.sh
+	@trap '$(MAKE) clean' EXIT; go test -v ./tests/...
 
 clean:
 	@echo "> Borrando contenedores viejos..."
