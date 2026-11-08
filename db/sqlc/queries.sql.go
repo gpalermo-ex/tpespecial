@@ -7,13 +7,12 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createRegister = `-- name: CreateRegister :one
 INSERT INTO albums (id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating) 
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at
+RETURNING id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at
 `
 
 type CreateRegisterParams struct {
@@ -27,19 +26,7 @@ type CreateRegisterParams struct {
 	Rating      int32  `json:"rating"`
 }
 
-type CreateRegisterRow struct {
-	IDAlbum     int32        `json:"id_album"`
-	IDUsuario   string       `json:"id_usuario"`
-	Titulo      string       `json:"titulo"`
-	Artista     string       `json:"artista"`
-	Descripcion string       `json:"descripcion"`
-	Genero      string       `json:"genero"`
-	DuracionMin int32        `json:"duracion_min"`
-	Rating      int32        `json:"rating"`
-	CreatedAt   sql.NullTime `json:"created_at"`
-}
-
-func (q *Queries) CreateRegister(ctx context.Context, arg CreateRegisterParams) (CreateRegisterRow, error) {
+func (q *Queries) CreateRegister(ctx context.Context, arg CreateRegisterParams) (Album, error) {
 	row := q.db.QueryRowContext(ctx, createRegister,
 		arg.IDAlbum,
 		arg.IDUsuario,
@@ -50,8 +37,9 @@ func (q *Queries) CreateRegister(ctx context.Context, arg CreateRegisterParams) 
 		arg.DuracionMin,
 		arg.Rating,
 	)
-	var i CreateRegisterRow
+	var i Album
 	err := row.Scan(
+		&i.IDRegistro,
 		&i.IDAlbum,
 		&i.IDUsuario,
 		&i.Titulo,

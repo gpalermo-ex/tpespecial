@@ -2,7 +2,7 @@
 POST http://localhost:8080/albums
 Content-Type: application/json
 {
-  "id_album" : 1
+  "id_album" : 1,
   "id_usuario": "user1",
   "titulo": "Album 1",
   "artista": "Artista 1",

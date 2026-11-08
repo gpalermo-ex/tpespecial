@@ -1,142 +1,74 @@
-# Catálogo Musical API
+# Catálogo Musical
 
-Este proyecto es una API REST desarrollada en Go para gestionar un catálogo de álbumes musicales y poder rankearlos según tu gusto. Permite listar, crear, consultar, actualizar y eliminar registros de álbumes almacenados en una base de datos PostgreSQL.
+Aplicación web para llevar un catálogo personal de álbumes y registrar una valoración para cada uno. Desde la página principal se pueden consultar los registros existentes y cargar nuevas valoraciones mediante un formulario.
 
-## ¿Qué hace la aplicación?
+Cada registro incluye el identificador del álbum, el usuario, el título, el artista, una descripción, el género, la duración en minutos y una calificación de 1 a 5. La fecha de creación se asigna automáticamente en la base de datos.
 
-La API permite administrar información sobre álbumes, incluyendo:
+## Tecnologías
 
-- Identificador del álbum
-- Identificador del usuario
-- Título
-- Artista
-- Descripción
-- Género
-- Duración en segundos
-- Ranking (valoración del usuario entre 1 y 5)
-- Fecha de en la que se subió la valoración.
+- Go para el servidor web y la lógica de la aplicación.
+- PostgreSQL para almacenar los registros.
+- Docker Compose para iniciar la base de datos.
+- SQLC para generar código Go tipado a partir de las consultas SQL.
+- Templ para generar las vistas HTML desde componentes escritos en Go.
+- pgx como driver de PostgreSQL.
+- Make para automatizar generación, ejecución y pruebas.
 
-## Tecnologías utilizadas
+## Organización
 
-- Go
-- PostgreSQL
-- Docker + Docker Compose
-- SQLC para generar código de acceso a la base de datos
-- Net/HTTP de Go para los endpoints REST
-- pgx como driver de PostgreSQL
+- `main.go`: conecta con PostgreSQL, configura las rutas web y procesa el formulario de alta.
+- `views/`: componentes Templ para el layout, el formulario y el listado de registros.
+- `db/schema/schema.sql`: definición de la tabla `albums`.
+- `db/queries/queries.sql`: consultas para crear, listar, consultar, actualizar y eliminar registros.
+- `db/sqlc/`: código Go generado por SQLC.
+- `docker-compose.yml`: configuración del servicio PostgreSQL y carga inicial del esquema.
+- `tests/`: pruebas del CRUD y solicitudes de prueba de la aplicación.
+- `Makefile`: comandos automatizados para generar código, iniciar el entorno y ejecutar pruebas.
 
-## Estructura del proyecto
+## Datos almacenados
 
-- `main.go`: servidor HTTP principal y handlers de las rutas.
-- `db/schema/schema.sql`: esquema de la tabla `albums`.
-- `db/queries/queries.sql`: consultas SQL del CRUD.
-- `db/sqlc/`: código generado automáticamente por SQLC.
-- `static/index.html`: ejemplo de frontend estático para la vista del catálogo.
-- `docker-compose.yml`: configuración del contenedor de PostgreSQL.
-- `CRUD_test.go`: pruebas para validar el CRUD.
-- `test-api.sh` y `test.sh`: scripts útiles para ejecutar pruebas.
+La tabla `albums` registra una valoración asociada a un álbum y a un usuario. Incluye título, artista, descripción, género, duración en minutos, calificación entre 1 y 5 y fecha de creación. El identificador de registro es generado por PostgreSQL.
 
-## Base de datos
+## Requisitos
 
-La base de datos se estructura con la siguiente tabla:
+- Go instalado y compatible con la versión indicada en `go.mod`.
+- Docker y Docker Compose.
+- Make.
 
-```sql
-CREATE TABLE albums (
-    id_album SERIAL PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    titulo VARCHAR(255) NOT NULL,
-    artista VARCHAR(255) NOT NULL,
-    descripcion VARCHAR(255) NOT NULL,
-    genero VARCHAR(255) NOT NULL,
-    duracion_s INT NOT NULL,
-    ranking INT CHECK (ranking >= 1 AND ranking <= 5) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
+## Ejecutar con Make
 
-La tabla guarda cada álbum con su metadata principal y un ranking que limita la puntuación a valores válidos entre 1 y 5.
-
-## Endpoints de la API
-
-El servidor corre en `:8080` y expone los siguientes endpoints:
-
-### Obtener todos los álbumes
-
-- `GET /albums`
-
-Respuesta: JSON con la lista de álbumes.
-
-### Crear un álbum
-
-- `POST /albums`
-
-### Obtener un álbum por id
-
-- `GET /albums/:id`
-
-### Actualizar un álbum
-
-- `PUT /albums/:id`
-
-### Eliminar un álbum
-
-- `DELETE /albums/:id`
-
-## Cómo ejecutar el proyecto
-
-### 1. Levantar la base de datos
+Desde la carpeta del proyecto, ejecutá:
 
 ```bash
-docker compose up -d
+make run
 ```
 
-Esto levanta un contenedor PostgreSQL con la configuración definida en `docker-compose.yml`.
+Este comando prepara el entorno en este orden:
 
-### 2. Ejecutar la API
+1. Ejecuta `make clean`, que detiene los servicios y elimina los volúmenes de Docker Compose.
+2. Inicia PostgreSQL y espera a que esté disponible.
+3. Genera el código de SQLC y las vistas Templ.
+4. Inicia el servidor Go en el puerto `8080`.
 
-```bash
-go run .
-```
+Cuando aparezca el mensaje de que el servidor está activo, abrí [http://localhost:8080](http://localhost:8080) en el navegador.
 
-La aplicación se inicia en el puerto `8080`.
+> **Atención:** `make run` elimina los volúmenes antes de iniciar la base de datos, por lo que borra los datos guardados en ejecuciones anteriores.
 
-### 3. Probar los endpoints
+Para detener el servidor, usá `Ctrl+C`. Para detener y eliminar también los contenedores y volúmenes, ejecutá `make clean`.
 
-Ejemplo con curl:
+## Comandos disponibles
 
-```bash
-curl http://localhost:8080/albums
-```
+| Comando | Función |
+| --- | --- |
+| `make` o `make all` | Ejecuta el objetivo predeterminado: `make run`. |
+| `make run` | Limpia los volúmenes, inicia PostgreSQL, genera SQLC y Templ, y ejecuta la aplicación. |
+| `make up` | Limpia los volúmenes e inicia PostgreSQL en segundo plano. |
+| `make generate` | Regenera el código de SQLC y las vistas Templ. |
+| `make test` | Ejecuta el script de pruebas ubicado en `tests/test.sh`. |
+| `make clean` | Detiene los contenedores y elimina los volúmenes de Docker Compose. |
 
-```bash
-curl -X POST http://localhost:8080/albums \
-  -H "Content-Type: application/json" \
-    -d '{
-        "id_usuario": 1,
-        "titulo": "Detour",
-        "artista": "Kim Petras",
-        "descripcion": "Álbum de música pop",
-        "genero": "Pop",
-        "duracion_s": 2203,
-        "ranking": 5
-    }'
-```
+`make up` también depende de `make clean`, por lo tanto recrea la base de datos y elimina sus datos anteriores. El comando `make test` prepara y limpia la base de datos según los pasos del script.
 
-## Tests
-
-El proyecto incluye pruebas del CRUD en `CRUD_test.go`, donde se valida la creación, lectura, listado, actualización y eliminación de álbumes usando las funciones generadas por sqlc o sino `test-api.sh` donde se valida todo esto pero desde la API REST utilizando la herramienta HURL.
-
-Para ejecutarlos:
-
-```bash
-# Para testear el CRUD_test.go
-#chmod +x test.sh
-./test.sh
-
-# Para testear API REST
-#chmod +x test-api.sh
-./test-api.sh
-```
 
 
 

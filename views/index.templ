@@ -5,7 +5,7 @@ import (
 )
 
 templ ContenidoIndex(registros []db.Album){
-    @EntityForm()
+    @RegisterForm()
     @RegisterList(registros)
 }
 

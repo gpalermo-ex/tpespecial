@@ -26,7 +26,7 @@ func RegisterForm() templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<p>Nuevo registro de álbum</p><form action=\"/albums\" method=\"POST\">ID Album: <input type=\"text\" name=\"id_album\" required><br>ID Usuario: <input type=\"text\" name=\"id_usuario\" required><br>Titulo: <input type=\"text\" name=\"titulo\" required><br>Artista: <input type=\"text\" name=\"artista\" required><br>Descripcion: <input type=\"text\" name=\"descripcion\" required><br>Genero: <input type=\"text\" name=\"genero\" required><br>DuracionMin: <input type=\"text\" name=\"duracion_min\" required><br>Rating: <input type=\"text\" name=\"rating\" required><br><button type=\"submit\">Agregar</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<p>Nuevo registro de álbum</p><form action=\"/albums\" method=\"POST\">ID Album: <input type=\"text\" name=\"id_album\" required><br>Usuario: <input type=\"text\" name=\"id_usuario\" required><br>Titulo: <input type=\"text\" name=\"titulo\" required><br>Artista: <input type=\"text\" name=\"artista\" required><br>Descripcion: <input type=\"text\" name=\"descripcion\" required><br>Genero: <input type=\"text\" name=\"genero\" required><br>DuracionMin: <input type=\"text\" name=\"duracion_min\" required><br>Rating: <input type=\"text\" name=\"rating\" required><br><button type=\"submit\">Agregar</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

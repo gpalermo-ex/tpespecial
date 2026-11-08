@@ -10,7 +10,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"tpespecial/servidor-musica/db/sqlc"
 )
 
@@ -31,7 +30,7 @@ func ContenidoIndex(registros []db.Album) templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = EntityForm().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RegisterForm().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -89,7 +89,7 @@ func TestCrud(t *testing.T){
 		
 	t.Run("UpdateRegister", func(t *testing.T){
 		err = queries.UpdateRegister(ctx, sqlc.UpdateRegisterParams{
-			IDRegister: createdID,
+			IDRegistro: createdID,
 			IDAlbum: 6,
 			IDUsuario: "gonza_pal",
 			Titulo: "Detour Deluxe",

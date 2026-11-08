@@ -1,18 +1,34 @@
 package main
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	sqlc "tpespecial/servidor-musica/db/sqlc"
 	"tpespecial/servidor-musica/views"
-	"tpespecial/servidor-musica/db/sqlc"
 )
 func main() {
-	conn, err := db.ConnectDB()
-	if err != nil {
-		log.Fatal("Error al abrir la base de datos: %v", err)
-	}
-	defer conn.Close()
-	queries := db.New(conn)
+	connStr := "host=localhost port=5432 user=admin password=123 dbname=base_catalogo"
 	
+	// Establecemos la conexión con la bd de PostgreSQL que corre en Docker
+	db, err := sql.Open("pgx", connStr)
+	if err != nil {
+		log.Fatal("Error al configurar la base de datos:", err)
+	}
+
+	// Verificamos la conexión a la bd haciendo un ping
+	if err := db.Ping(); err != nil {
+		log.Fatal("No se pudo conectar a la base de datos. ¿Está prendido Docker?:", err)
+	}
+	fmt.Println("Conexión a la base de datos exitosa")
+	defer db.Close()
+
+	// Instancia de queries de sqlc
+	queries := sqlc.New(db)
+	
+	// Handler para "/" con GET
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if (r.URL.Path != "/" || r.Method != http.MethodGet) {
 			http.NotFound(w, r)
@@ -45,35 +61,35 @@ func main() {
 			return
 		}
 
-		id_album := r.FormValue("id_album")
+		id_album_text := r.FormValue("id_album")
 		id_usuario := r.FormValue("id_usuario")
 		titulo := r.FormValue("titulo")
 		artista := r.FormValue("artista")
 		descripcion := r.FormValue("descripcion")
 		genero := r.FormValue("genero")
-		duracion_min := r.FormValue("duracion_min")
-		rating := r.FormValue("rating")
+		duracion_min_text := r.FormValue("duracion_min")
+		rating_text := r.FormValue("rating")
 
-		id_album, err1 := strconv.Atoi(id_album)
-		duracion_min, err2 := strconv.Atoi(duracion_min)
-		rating, err3 := strconv.Atoi(rating)
+		id_album, err1 := strconv.Atoi(id_album_text)
+		duracion_min, err2 := strconv.Atoi(duracion_min_text)
+		rating, err3 := strconv.Atoi(rating_text)
 		if (err1 != nil || err2 != nil || err3 != nil){
 			log.Printf("Valores inválidos: %v", err)
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 
-		arg := db.CreateRegisterParams{
-			IDAlbum: id_album,
+		arg := sqlc.CreateRegisterParams{
+			IDAlbum: int32(id_album),
 			IDUsuario: id_usuario,
 			Titulo: titulo,
 			Artista: artista,
 			Descripcion: descripcion,
 			Genero: genero,
-			DuracionMin: duracion_min,
-			Rating: rating,
+			DuracionMin: int32(duracion_min),
+			Rating: int32(rating),
 		}
-		err := queries.CreateRegister(r.Context(), arg)
+		_, err := queries.CreateRegister(r.Context(), arg)
 		if err != nil {
 			log.Printf("Error al crear el registro en la base de datos: %v", err)
 			http.Redirect(w, r, "/", http.StatusSeeOther)

@@ -1,7 +1,7 @@
 -- name: CreateRegister :one
 INSERT INTO albums (id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating) 
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-RETURNING id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at;
+RETURNING id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at;
 
 -- name: GetRegister :one
 SELECT id_registro, id_album, id_usuario, titulo, artista, descripcion, genero, duracion_min, rating, created_at 
