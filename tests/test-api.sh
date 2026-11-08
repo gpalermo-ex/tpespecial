@@ -33,12 +33,12 @@ cleanup() {
     docker compose down -v
     echo -e "- Borrando ejecutable...\n"
     rm -f api_server
-    echo -e "- Limpieza finalizada.\n"
+    echo -e "- Limpieza finalizada.\n ERROR CONOCIDO: Este script no funciona porque se borró el funcionamiento de la API. \n Se mantiene por si en el futuro se vuelve a implementar esta funcionalidad. \n"
 }
 # La instrucción trap vincula la función cleanup al evento EXIT
 trap cleanup EXIT
 
 echo -e "  Ejecutando pruebas con Hurl "
-hurl --test requests.hurl
+hurl --test tests/requests.hurl
 
 echo -e "Todas las pruebas finalizaron con éxito!"
