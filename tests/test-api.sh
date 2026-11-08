@@ -38,10 +38,6 @@ cleanup() {
 # La instrucción trap vincula la función cleanup al evento EXIT
 trap cleanup EXIT
 
-# Esperamos unos segundos por las dudas si no llegó a prenderse el server WEB
-sleep 2
-
-
 echo -e "  Ejecutando pruebas con Hurl "
 hurl --test requests.hurl
 
