@@ -2,7 +2,7 @@ package views
 
 templ RegisterForm() {
 	<p>Nuevo registro de álbum</p>
-	<form action="/albums" method="POST">
+	<form id="register-form" hx-post="/albums" hx-target="#register-list" hx-swap="outerHTML">
 		ID Album:
 		<input type="text" name="id_album" required /><br />
 		Usuario:
