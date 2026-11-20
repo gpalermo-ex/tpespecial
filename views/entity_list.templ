@@ -6,8 +6,7 @@ import (
 )
 
 templ RegisterList(albums []db.Album) {
-	<section id="register-list">
-		<p id="form-error" role="alert" style="color: red;"></p>
+	<section>
 		<h2>Colección de Álbumes</h2>
 		if len(albums) == 0 {
 			<p>No hay álbumes en el catálogo.</p>
@@ -35,22 +34,7 @@ templ RegisterList(albums []db.Album) {
 							<td>{ album.Genero }</td>
 							<td>{ fmt.Sprint(album.DuracionMin) } min</td>
 							<td>{ fmt.Sprint(album.Rating) }/5</td>
-							<td>
-								if album.CreatedAt.Valid {
-									{ album.CreatedAt.Time.Format("02/01/2006 15:04") }
-								} else {
-									-
-								}
-							</td>
-							<td>
-								<button
-									hx-delete={ fmt.Sprintf("/albums/%d", album.IDRegistro) }
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									hx-confirm="¿Estás seguro de que deseas eliminar este registro?">	
-									Borrar
-								</button>
-							</td>
+							<td>{ fmt.Sprint(album.CreatedAt) }</td>
 						</tr>
 					}
 				</tbody>

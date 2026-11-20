@@ -1,126 +1,74 @@
 # Catálogo Musical
 
-Aplicación web en Go para registrar y consultar valoraciones de álbumes. La página muestra los registros guardados en PostgreSQL y permite crear y eliminar registros desde una interfaz HTML actualizada dinámicamente con HTMX.
+Aplicación web para llevar un catálogo personal de álbumes y registrar una valoración para cada uno. Desde la página principal se pueden consultar los registros existentes y cargar nuevas valoraciones mediante un formulario.
 
-## Funcionalidades
-
-- Listar los registros ordenados por su identificador interno.
-- Crear un registro con álbum, usuario, título, artista, descripción, género, duración y rating.
-- Validar que los campos tengan valores correctos.
-- Mostrar mensajes de errores por pantalla cuando haga falta.
-- Eliminar un registro desde su fila.
-
-Hay además consultas como `GetRegister` (para obtener de a un registro por su ID) y `UpdateRegister` (para actualizar registros existentes) que también están definidas y generan funciones Go mediante SQLC, pero actualmente no tienen handlers ni controles en la interfaz web. Decidimos dejarlas para una posible futura actualización.)
-
-## Requisitos
-
-- Go compatible con la versión indicada en `go.mod`.
-- Docker con el plugin Docker Compose.
-- GNU Make.
-- Acceso a Internet la primera vez que se ejecuta `make generate`, porque los comandos descargan las versiones fijadas de SQLC y Templ.
-
-## Ejecución
-
-Desde la carpeta del proyecto:
-
-```sh
-make run
-```
-
-El objetivo `run` ejecuta, en orden:
-
-1. `make up`, que depende de `make clean`: detiene y elimina los contenedores y volúmenes de Compose.
-2. `docker compose up -d --wait`, que inicia PostgreSQL en segundo plano y espera a que esté saludable.
-3. `make generate`, que genera el código de SQLC y las vistas Templ.
-4. `go run main.go`, que inicia el servidor web en `http://localhost:8080`.
-
-Al terminar o interrumpir el servidor con `Ctrl+C`, la receta ejecuta `make clean` mediante un `trap`. `clean` corre `docker compose down -v`, que elimina también el volumen de la base de datos.
-
-> **Importante:** tanto `make run` como `make up` limpian los volúmenes al comenzar. Al finalizar `make run`, también se eliminan. Por lo tanto, los datos no se conservan entre ejecuciones. No uses estos objetivos si necesitas preservar los datos de una base local.
-
-## Comandos de Make
-
-| Comando | Función |
-| --- | --- |
-| `make` o `make all` | Ejecuta el objetivo predeterminado `run`. |
-| `make generate` | Ejecuta SQLC `v1.31.1` y Templ `v0.3.1118` para regenerar código. |
-| `make clean` | Ejecuta `docker compose down -v`; detiene los servicios y elimina los volúmenes. |
-| `make up` | Limpia el entorno y luego levanta PostgreSQL esperando el healthcheck. |
-| `make run` | Prepara la base, genera el código, inicia la aplicación y limpia Docker al salir. |
-| `make test` | Prepara la base, genera el código, ejecuta las pruebas de `tests/` y limpia Docker al terminar. |
-
-Las versiones de los generadores están fijadas en `SQLC_VERSION` y `TEMPL_VERSION` dentro del `Makefile`, para evitar que una ejecución use automáticamente una versión distinta.
-
-## Pruebas
-
-```sh
-make test
-```
-
-Las pruebas de `tests/CRUD_test.go` se conectan a PostgreSQL y ejercitan las operaciones de creación, lectura, listado, actualización y borrado. El objetivo `test` prepara la base y ejecuta `go test -v ./tests/...`; al terminar, su `trap` llama a `make clean`, incluso si las pruebas fallan.
-
-Los archivos `tests/requests.hurl`, `tests/test-api.sh` y `tests/test.sh` contienen material adicional para probar la API. Para las pruebas de integración, PostgreSQL debe poder iniciarse mediante Docker Compose.
+Cada registro incluye el identificador del álbum, el usuario, el título, el artista, una descripción, el género, la duración en minutos y una calificación de 1 a 5. La fecha de creación se asigna automáticamente en la base de datos.
 
 ## Tecnologías
 
-- **Go** implementa el servidor HTTP, los handlers y la validación del formulario.
-- **PostgreSQL** almacena los registros.
-- **Docker Compose** ejecuta PostgreSQL en un contenedor y espera a que pase su healthcheck.
-- **SQLC** transforma consultas SQL escritas manualmente en funciones y tipos Go generados y tipados.
-- **Templ** genera componentes Go que renderizan el HTML del layout, el formulario y la lista.
-- **HTMX** envía el formulario y las solicitudes de borrado sin recargar la página completa, e intercambia fragmentos HTML devueltos por el servidor.
-- **pgx** es el driver usado por `database/sql` para conectarse a PostgreSQL.
-- **Make** automatiza la generación, el arranque y las pruebas.
+- Go para el servidor web y la lógica de la aplicación.
+- PostgreSQL para almacenar los registros.
+- Docker Compose para iniciar la base de datos.
+- SQLC para generar código Go tipado a partir de las consultas SQL.
+- Templ para generar las vistas HTML desde componentes escritos en Go.
+- pgx como driver de PostgreSQL.
+- Make para automatizar generación, ejecución y pruebas.
 
-## Flujo y arquitectura interna
+## Organización
 
-La aplicación Go corre en el host, escuchando en el puerto `8080`. PostgreSQL corre en Docker y Compose publica el puerto `5432` del contenedor como `5432` en el host. Por eso el servidor Go se conecta a `localhost:5432`; no hace falta incluir la aplicación web en Docker para esta configuración.
+- `main.go`: conecta con PostgreSQL, configura las rutas web y procesa el formulario de alta.
+- `views/`: componentes Templ para el layout, el formulario y el listado de registros.
+- `db/schema/schema.sql`: definición de la tabla `albums`.
+- `db/queries/queries.sql`: consultas para crear, listar, consultar, actualizar y eliminar registros.
+- `db/sqlc/`: código Go generado por SQLC.
+- `docker-compose.yml`: configuración del servicio PostgreSQL y carga inicial del esquema.
+- `tests/`: pruebas del CRUD y solicitudes de prueba de la aplicación.
+- `Makefile`: comandos automatizados para generar código, iniciar el entorno y ejecutar pruebas.
 
-Al iniciar, `main.go` abre la conexión a la base, comprueba que PostgreSQL responda con `Ping` y crea el conjunto de consultas SQLC. Luego registra estos endpoints:
+## Datos almacenados
 
-| Método | Ruta | Comportamiento |
-| --- | --- | --- |
-| `GET` | `/` | Consulta los registros y renderiza la página completa. |
-| `POST` | `/albums` | Valida los campos, crea el registro y devuelve la lista actualizada. Si la conversión numérica o el rango del rating fallan, devuelve un mensaje para el destino HTMX `#form-error`. |
-| `DELETE` | `/albums/{id}` | Elimina el registro identificado por su `id_registro`. |
+La tabla `albums` registra una valoración asociada a un álbum y a un usuario. Incluye título, artista, descripción, género, duración en minutos, calificación entre 1 y 5 y fecha de creación. El identificador de registro es generado por PostgreSQL.
 
-El formulario Templ envía `POST /albums` con `hx-target="#register-list"` y `hx-swap="outerHTML"`. En caso exitoso, el servidor consulta la lista de nuevo y devuelve el fragmento `RegisterList`; HTMX reemplaza el contenedor existente. Cada botón de borrado apunta al `id_registro` de su fila y, si la solicitud tiene éxito, HTMX elimina esa fila del documento.
+## Requisitos
 
-El mensaje de validación se ubica dentro de `#register-list`. El handler indica a HTMX que lo use como destino mediante `HX-Retarget` y que inserte el texto dentro del elemento con `HX-Reswap`. Los errores de base de datos durante la creación actualmente se registran en el log y redirigen a `/`.
+- Go instalado y compatible con la versión indicada en `go.mod`.
+- Docker y Docker Compose.
+- Make.
 
-## Base de datos
+## Ejecutar con Make
 
-El esquema está en `db/schema/schema.sql` y crea la tabla `albums` con estas columnas:
+Desde la carpeta del proyecto, ejecutá:
 
-| Columna | Uso |
-| --- | --- |
-| `id_registro` | Clave primaria autoincremental que identifica cada registro. |
-| `id_album` | Identificador del álbum asociado. |
-| `id_usuario` | Usuario que registra la valoración. |
-| `titulo`, `artista`, `descripcion`, `genero` | Datos descriptivos del álbum. |
-| `duracion_min` | Duración expresada en minutos. |
-| `rating` | Valor entero obligatorio entre 1 y 5, validado también por una restricción `CHECK`. |
-| `created_at` | Fecha y hora asignadas por PostgreSQL al crear el registro. |
-
-Las consultas están en `db/queries/queries.sql`. `sqlc.yaml` le indica a SQLC que use el motor PostgreSQL, lea el esquema y las consultas de esas carpetas y escriba el código generado en `db/sqlc/`. Los archivos generados no se editan manualmente: se modifican las consultas o el esquema y luego se vuelve a ejecutar `make generate`.
-
-Las vistas fuente de Templ están en `views/*.templ`; los archivos `*_templ.go` son generados y tampoco se editan manualmente.
-
-## Estructura del proyecto
-
-```text
-.
-|-- main.go                 # servidor HTTP, conexión y handlers
-|-- Makefile                # generación, entorno, ejecución y pruebas
-|-- docker-compose.yml      # servicio PostgreSQL
-|-- sqlc.yaml               # configuración de SQLC
-|-- db/
-|   |-- schema/schema.sql   # esquema de PostgreSQL
-|   |-- queries/queries.sql # consultas SQL fuente de SQLC
-|   `-- sqlc/               # código Go generado por SQLC
-|-- views/
-|   |-- *.templ             # componentes fuente
-|   `-- *_templ.go          # código generado por Templ
-|-- tests/                  # pruebas y solicitudes de ejemplo
-`-- static/                 # archivos estáticos del proyecto
+```bash
+make run
 ```
+
+Este comando prepara el entorno en este orden:
+
+1. Ejecuta `make clean`, que detiene los servicios y elimina los volúmenes de Docker Compose.
+2. Inicia PostgreSQL y espera a que esté disponible.
+3. Genera el código de SQLC y las vistas Templ.
+4. Inicia el servidor Go en el puerto `8080`.
+
+Cuando aparezca el mensaje de que el servidor está activo, abrí [http://localhost:8080](http://localhost:8080) en el navegador.
+
+> **Atención:** `make run` elimina los volúmenes antes de iniciar la base de datos, por lo que borra los datos guardados en ejecuciones anteriores.
+
+Para detener el servidor, usá `Ctrl+C`. Para detener y eliminar también los contenedores y volúmenes, ejecutá `make clean`.
+
+## Comandos disponibles
+
+| Comando | Función |
+| --- | --- |
+| `make` o `make all` | Ejecuta el objetivo predeterminado: `make run`. |
+| `make run` | Limpia los volúmenes, inicia PostgreSQL, genera SQLC y Templ, y ejecuta la aplicación. |
+| `make up` | Limpia los volúmenes e inicia PostgreSQL en segundo plano. |
+| `make generate` | Regenera el código de SQLC y las vistas Templ. |
+| `make test` | Prepara la base de datos, genera SQLC y Templ, ejecuta `go test -v ./tests/...` y limpia los contenedores y volúmenes al terminar. |
+| `make clean` | Detiene los contenedores y elimina los volúmenes de Docker Compose. |
+
+`make up` también depende de `make clean`, por lo tanto recrea la base de datos y elimina sus datos anteriores. `make test` realiza esa preparación antes de ejecutar las pruebas y garantiza la limpieza al finalizar, incluso si las pruebas fallan.
+
+
+
+
